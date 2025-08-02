@@ -33,18 +33,29 @@ class ContactManager:
 
     # search contact
     def search(self, name=None, phone_number=None):
-        result = []
-        for contact in self.contact_list:
-            if (name and contact["name"].lower() == name.lower()) or \
-               (phone_number and contact["phone_number"] == phone_number):
-                result.append(contact)
+        try:
+            with open(self.file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                contacts = data.get("contacts", [])
 
-        if result:
-            print("\nResult of search:")
-            for c in result:
-                print(f"Name: {c['name']}\nPhone: {c['phone_number']}")
-        else:
-            print("\n No result found.")
+                result = []
+                for contact in contacts:
+                    if (name and contact["name"].lower() == name.lower()) or \
+                       (phone_number and contact["phone_number"] == phone_number):
+                        result.append(contact)
+
+                if result:
+                    print("\nSearch result from file:")
+                    for c in result:
+                        print(f"Name: {c['name']}, Phone: {c['phone_number']}")
+                else:
+                    print("\nNo result found in file.")
+
+        except FileNotFoundError:
+            print("File not found.")
+        except json.JSONDecodeError:
+            print("Error decoding JSON file.")
+
 
     # backup list contact
     def backup(self, backup_path="./contact_list_backup.json"):
