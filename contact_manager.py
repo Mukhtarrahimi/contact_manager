@@ -1,18 +1,37 @@
 import json
+import os
 
 class ContactManager:
-    def __init__(self):
+    def __init__(self, file_path="contact.json"):
+        self.file_path = file_path
         self.contact_list = []
+        self._load_contacts_from_file()
 
-    # function for add contact
+    def _load_contacts_from_file(self):
+        if not os.path.exists(self.file_path):
+            with open(self.file_path, 'w') as f:
+                json.dump({"contacts": []}, f, indent=4)
+
+        with open(self.file_path, 'r') as f:
+            try:
+                file_data = json.load(f)
+                self.contact_list = file_data.get("contacts", [])
+            except json.JSONDecodeError:
+                self.contact_list = []
+
+    def _save_to_file(self):
+        with open(self.file_path, 'w') as f:
+            json.dump({"contacts": self.contact_list}, f, indent=4)
+
+    #  Add a contact
     def add(self, id, name, phone_number):
-        self.contact_list.append({
-            "id": id,
-            "name": name,
-            "phone_number": phone_number
-        })
+        new_contact = {"id": id, "name": name, "phone_number": phone_number}
+        self.contact_list.append(new_contact)
+        self._save_to_file()
+        print(f" Contact '{name}' added.")
+        return new_contact
 
-    # function for search in contact list
+    # search contact
     def search(self, name=None, phone_number=None):
         result = []
         for contact in self.contact_list:
@@ -21,26 +40,26 @@ class ContactManager:
                 result.append(contact)
 
         if result:
-            print(" Result of search:")
+            print("\nResult of search:")
             for c in result:
                 print(f"Name: {c['name']}\nPhone: {c['phone_number']}")
         else:
-            print(" No result found.")
+            print("\n No result found.")
 
-    # function for backup contact list
-    def backup(self, file_path="./contact_list.json"):
-        with open(file_path, "w", encoding="utf-8") as f:
+    # backup list contact
+    def backup(self, backup_path="./contact_list_backup.json"):
+        with open(backup_path, "w", encoding="utf-8") as f:
             json.dump(self.contact_list, f, ensure_ascii=False, indent=4)
-        print("Backup saved successfully.")
+        print(f" Backup saved to {backup_path}")
 
-    # function for display contact list
+    #  display all contacts
     def display(self):
-        print("\nContact list:")
+        print("\n Contact list:")
         for c in self.contact_list:
             print(f"{c['id']}. Name: {c['name']}\n   Phone: {c['phone_number']}")
 
 
-#  test system
+# test system
 con = ContactManager()
 con.add(1, "John", "123456")
 con.add(2, "rahimi", "789012")
