@@ -57,6 +57,37 @@ class ContactManager:
             print("Error decoding JSON file.")
 
 
+    # delete contact
+        # delete contact by id or name
+    def delete(self, id=None, name=None):
+        try:
+            with open(self.file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            contacts = data.get("contacts", [])
+            original_len = len(contacts)
+
+            contacts = [c for c in contacts if not (
+                (id and c["id"] == id) or (name and c["name"].lower() == name.lower())
+            )]
+
+            deleted_count = original_len - len(contacts)
+
+            if deleted_count > 0:
+                with open(self.file_path, 'w', encoding='utf-8') as f:
+                    json.dump({"contacts": contacts}, f, ensure_ascii=False, indent=4)
+                print(f"{deleted_count} contact(s) deleted.")
+                self.contact_list = contacts  
+            else:
+                print("No matching contact found to delete.")
+
+        except FileNotFoundError:
+            print("File not found.")
+        except json.JSONDecodeError:
+            print("Error decoding JSON file.")
+
+
+    
     # backup list contact
     def backup(self, backup_path="./contact_list_backup.json"):
         with open(backup_path, "w", encoding="utf-8") as f:
