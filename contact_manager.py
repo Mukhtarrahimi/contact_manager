@@ -87,6 +87,38 @@ class ContactManager:
             print("Error decoding JSON file.")
 
 
+    # edit contact
+    def edit(self, id=None, name=None, new_name=None, new_phone_number=None):
+        try:
+            with open(self.file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                contacts = data.get("contacts", [])
+
+            contact = next((c for c in contacts if (id and c["id"] == id) or 
+                                                   (name and c["name"].lower() == name.lower())), None)
+
+            if contact:
+                if new_name:
+                    contact["name"] = new_name
+                if new_phone_number:
+                    contact["phone_number"] = new_phone_number
+
+                with open(self.file_path, 'w', encoding='utf-8') as f:
+                    json.dump({"contacts": contacts}, f, ensure_ascii=False, indent=4)
+
+                self.contact_list = contacts
+
+                print("Contact updated successfully.")
+            else:
+                print("Contact not found.")
+
+        except FileNotFoundError:
+            print("File not found.")
+        except json.JSONDecodeError:
+            print("Error decoding JSON file.")
+
+                    
+                            
     
     # backup list contact
     def backup(self, backup_path="./contact_list_backup.json"):
